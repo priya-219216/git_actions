@@ -1,0 +1,48 @@
+name: Selenium Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  selenium-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install React App Dependencies
+        run: npm install
+
+      - name: Start React App
+        run: |
+          npm start &
+        continue-on-error: true
+
+      - name: Wait for App to Start
+        run: npx wait-on http://localhost:3000
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Install Python Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Chrome & ChromeDriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y chromium-chromedriver
+
+      - name: Run Selenium Tests
+        run: pytest -v
